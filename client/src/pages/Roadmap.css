@@ -1,0 +1,132 @@
+.roadmap-page { display: flex; flex-direction: column; gap: 24px; }
+
+.goal-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.goal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.goal-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--goal-color) 8%, transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.goal-card:hover { border-color: #333; transform: translateY(-2px); }
+.goal-card:hover::before { opacity: 1; }
+.goal-card.active {
+  border-color: var(--goal-color);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--goal-color) 20%, transparent);
+}
+.goal-card.active::before { opacity: 1; }
+.goal-icon { font-size: 28px; position: relative; z-index: 1; }
+.goal-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+.goal-card.active .goal-label { color: var(--goal-color); }
+
+/* Progress */
+.progress-card { padding: 20px; }
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+.progress-pct {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+}
+.progress-track {
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* Weeks */
+.weeks-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+.week-card { padding: 20px; }
+.week-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+.week-num {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 3px;
+}
+.week-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.week-progress {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.week-items { display: flex; flex-direction: column; gap: 6px; }
+.roadmap-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.roadmap-item:hover { border-color: #333; }
+.roadmap-item.done { opacity: 0.45; }
+.roadmap-item.done .item-text { text-decoration: line-through; }
+.roadmap-item input[type=checkbox] {
+  accent-color: var(--green);
+  width: 14px; height: 14px;
+  flex-shrink: 0;
+}
+.item-text { font-size: 13px; color: var(--text-secondary); }
+
+.roadmap-content { display: flex; flex-direction: column; gap: 16px; }
+
+@media (max-width: 900px) {
+  .goal-grid { grid-template-columns: repeat(2, 1fr); }
+  .weeks-grid { grid-template-columns: 1fr; }
+}

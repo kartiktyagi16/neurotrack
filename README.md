@@ -35,106 +35,142 @@ A production-grade EdTech platform built with React + Node.js, inspired by YouTu
 
 ---
 
-## 📁 Folder Structure
+## 📁 Project Structure
 
 ```
 neurotrack/
+├── client/                          # React frontend (Vite)
+│   └── src/
+│       ├── context/AuthContext.jsx  # Global auth + theme state
+│       ├── pages/
+│       │   ├── Home.jsx             # Landing page
+│       │   ├── Auth.jsx             # Login + Signup + OTP
+│       │   ├── Dashboard.jsx        # Stats dashboard
+│       │   ├── Notes.jsx            # AI notes generator
+│       │   ├── Quiz.jsx             # Quiz builder
+│       │   ├── Timetable.jsx        # Study schedule
+│       │   ├── Roadmap.jsx          # Week-by-week roadmap
+│       │   ├── Analytics.jsx        # Performance charts
+│       │   └── StudentProfile.jsx   # Per-student profile
+│       ├── components/
+│       │   ├── Navbar.jsx           # Top nav
+│       │   └── DashboardLayout.jsx  # Sidebar shell
+│       ├── styles/global.css        # CSS variables, dark/light theme
+│       ├── App.jsx                  # Routes + auth guards
+│       └── main.jsx                 # React entry point
 │
-├── client/                     # React frontend
-│   ├── src/
-│   │   ├── pages/              # Home, Dashboard, Notes, Quiz, Timetable, Roadmap, Analytics
-│   │   ├── components/         # Navbar, DashboardLayout (sidebar)
-│   │   ├── styles/             # global.css (design system)
-│   │   ├── App.jsx             # Router setup
-│   │   └── main.jsx            # Entry point
-│   ├── index.html
-│   ├── vite.config.js
-│   └── package.json
-│
-├── server/                     # Node.js backend
-│   ├── routes/
-│   │   ├── notes.js            # POST /api/generate-notes
-│   │   ├── quiz.js             # POST /api/generate-quiz
-│   │   └── roadmap.js          # POST /api/generate-roadmap
-│   ├── server.js               # Express app entry
-│   └── package.json
-│
-└── README.md
+└── server/                          # Node.js + Express backend
+    ├── routes/
+    │   ├── notes.js                 # POST /api/generate-notes
+    │   ├── quiz.js                  # POST /api/generate-quiz
+    │   ├── roadmap.js               # POST /api/generate-roadmap
+    │   └── auth.js                  # POST /api/auth/send-otp & verify-otp
+    ├── server.js                    # Express app + middleware
+    ├── .env.example                 # Environment variable template
+    └── package.json
 ```
 
 ---
 
-## 🚀 Installation & Setup
+## 🚀 How to Run
 
-### Prerequisites
-- Node.js v18+
-- npm or yarn
-
-### 1. Clone the repository
+### Backend
 ```bash
-git clone https://github.com/kartik/neurotrack.git
-cd neurotrack
+cd server
+npm install
+npm run dev        # runs on http://localhost:5001
 ```
 
-### 2. Setup & run the frontend
+### Frontend
 ```bash
 cd client
 npm install
-npm run dev
-# → http://localhost:5173
+npm run dev        # runs on http://localhost:5173
 ```
 
-### 3. Setup & run the backend
+### Enable Real OTP Emails (optional)
 ```bash
-cd ../server
-npm install
-npm run dev   # uses nodemon
-# → http://localhost:5000
+cd server
+cp .env.example .env
+# Fill in SMTP_HOST, SMTP_USER, SMTP_PASS
 ```
+Without this, the app runs in **demo mode** — OTP appears on screen.
 
-### 4. Open in browser
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---|---|
+| 🔐 Auth + OTP | Login/Signup with 6-digit email verification |
+| 📝 AI Notes | Generate structured notes on any topic |
+| 🧠 Smart Quiz | Auto-generate MCQ quizzes with scoring |
+| 📊 Analytics | Score growth charts and quiz performance bars |
+| 🗓️ Timetable | Personalised study schedule generator |
+| 🗺️ Roadmap | Weekly plans: Placement, AI, Web Dev, DSA |
+| 🔥 Heatmap | GitHub-style 365-day activity tracker |
+| 👤 Student Profile | Unique profile created on first login |
+| ☀️ Light / Dark Mode | Full theme switch, persisted in localStorage |
+
+---
+
+## 🔐 Auth Flow
+
 ```
-http://localhost:5173
+/auth page
+ ├── SIGNUP
+ │    Step 1 → Name, Email, Password
+ │    Step 2 → Goal, Subjects
+ │    → Server generates OTP → emailed (or shown in demo)
+ │    → User enters OTP → profile created → redirect /dashboard
+ │
+ └── LOGIN
+      Email + Password → verified against stored profile
+      → Server generates OTP → emailed (or shown in demo)
+      → User enters OTP → redirect /dashboard
 ```
 
 ---
 
-## 🤖 How to Integrate AI API
+## 🗄️ Data Storage (localStorage)
 
-The backend routes are pre-structured with clear TODO comments for AI integration.
-
-### Using OpenAI (GPT-4)
-
-1. Install the SDK:
-```bash
-cd server && npm install openai
-```
-
-2. Set your API key in a `.env` file:
-```
-OPENAI_API_KEY=sk-your-key-here
-```
-
-3. In `server/routes/notes.js`, replace the mock data block:
-```js
-const OpenAI = require('openai')
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-
-const prompt = `Generate structured study notes for the topic "${topic}" in "${subject}" at ${difficulty} difficulty. Return JSON with: definition, keyPoints (array), examples (array), summary.`
-
-const completion = await openai.chat.completions.create({
-  model: 'gpt-4',
-  messages: [{ role: 'user', content: prompt }],
-  response_format: { type: 'json_object' }
-})
-
-const data = JSON.parse(completion.choices[0].message.content)
-res.json({ success: true, data })
-```
-
-4. Apply the same pattern to `quiz.js` and `roadmap.js`.
+| Key | Stores |
+|---|---|
+| `nt_user` | Logged-in user object |
+| `nt_profile_{email}` | Full student profile (unique per email) |
+| `nt_theme` | `"dark"` or `"light"` |
+| `nt_heatmap_{email}` | Daily study session counts |
+| `nt_stats` | Notes/quizzes/score/hours counts |
 
 ---
+
+## 🌐 API Endpoints
+
+### AI Routes (original — untouched)
+| Method | Endpoint | Body |
+|---|---|---|
+| POST | `/api/generate-notes` | `{ subject, topic, difficulty }` |
+| POST | `/api/generate-quiz` | `{ topic, difficulty, count }` |
+| POST | `/api/generate-roadmap` | `{ goal, duration }` |
+| GET | `/api/health` | — |
+
+### Auth Routes (new)
+| Method | Endpoint | Body |
+|---|---|---|
+| POST | `/api/auth/send-otp` | `{ email, name }` |
+| POST | `/api/auth/verify-otp` | `{ email, otp }` |
+
+---
+
+## 🎨 Tech Stack
+
+**Frontend:** React 18, Vite, React Router v6, Recharts, CSS Variables
+**Backend:** Node.js, Express.js, Nodemailer, CORS
+
+---
+
+## 👨‍💻 Built By
+Made with ♥ by Kartik · © 2026 NeuroTrack
 
 ## 🔮 Future Improvements
 
